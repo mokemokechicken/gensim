@@ -297,13 +297,12 @@ class PoincareModel(utils.SaveLoad):
         if positive_fraction < 0.01:
             # If number of positive relations is a small fraction of total nodes
             # re-sample till no positively connected nodes are chosen
-            indices = self._get_candidate_negatives()
-            unique_indices = set(indices)
+            unique_indices = set(self._get_candidate_negatives()) - node_relations
             times_sampled = 1
-            while (len(indices) != len(unique_indices)) or (unique_indices & node_relations):
+            while len(unique_indices) < self.negative:
                 times_sampled += 1
-                indices = self._get_candidate_negatives()
-                unique_indices = set(indices)
+                unique_indices |= set(self._get_candidate_negatives()) - node_relations
+            indices = list(unique_indices)[:self.negative]
             if times_sampled > 1:
                 logger.debug('sampled %d times, positive fraction %.5f', times_sampled, positive_fraction)
         else:
